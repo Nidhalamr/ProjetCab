@@ -17,8 +17,7 @@ const schema = new mongoose.Schema({
         type:String,
         required:true
     }
-    // rapport:[{medecin:String,rapport:String}]
-})
+},{timestamps:true}); 
 
 module.exports = mongoose.model("Patient", schema);
 

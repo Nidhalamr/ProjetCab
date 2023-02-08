@@ -10,13 +10,15 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema({
 
-    email:{
+    theId:{
         type:String,
-        required:true
+        unique:true
     },
     password:{
         type:String,
-        required:true
+        required:true,
+        min:5
+        
     },
     nom:{
         type:String,
@@ -38,9 +40,9 @@ const schema = new mongoose.Schema({
         type:Boolean,
         default:false
     }
+
    
-}); 
-// const schema=isM(Schemauser)
+},{timestamps:true}); 
 module.exports = mongoose.model("User", schema);
 
 
