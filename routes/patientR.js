@@ -1,7 +1,8 @@
-const express = require('express')
+import express from "express";
+
 const router=express.Router()
-const patientController=require("../contoller/patientc")
-const verifyToken=require("../middleware/authentification")
+import patientController from "../contoller/patientc.js"
+import verifyToken from "../middleware/authentification.js"
 
 
 
@@ -13,4 +14,4 @@ router.delete("/delete/:id",verifyToken.verifyTokenAny,patientController.deleteP
 
 router.get("/search/query",patientController.querrySearchUser)
 
-module.exports = router
+export default router

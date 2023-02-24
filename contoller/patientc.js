@@ -1,27 +1,28 @@
 
 
+import jwt  from 'jsonwebtoken';
 
-const Patient = require("../models/Patient");
-const User = require("../models/User");
-const Rapport = require("../models/Rapport");
-const { v4: uuidv4 } = require('uuid');
-
-
-
+import Patient from "../models/Patient.js";
+import User from "../models/User.js";
+import Rapport from "../models/Rapport.js";
+import { uuid } from 'uuidv4';
 
 
-exports.findPatients = async (req, res) => {
+
+
+
+const findPatients = async (req, res) => {
   const patients = await Patient.find();
   res.json({ data: patients });
 };
 
-exports.createPatient = async (req, res) => {
+const createPatient = async (req, res) => {
   const patient = new Patient(req.body);
   await patient.save();
   res.json({ data: patient });
 };
 
-exports.findPatient = async (req, res) => {
+const findPatient = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     res.json({ data: patient });
@@ -42,7 +43,7 @@ exports.findPatient = async (req, res) => {
 
 
 
-exports.updatePatient = async (req, res) => {
+const updatePatient = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     Object.assign(patient, req.body);
@@ -53,7 +54,7 @@ exports.updatePatient = async (req, res) => {
   }
 };
 
-exports.deletePatient = async (req, res) => {
+const deletePatient = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     await patient.remove();
@@ -63,7 +64,7 @@ exports.deletePatient = async (req, res) => {
   }
 };
 
-// exports.createUser = async (req, res) => {
+// const createUser = async (req, res) => {
 //     // let user = new User(req.body);
 //     // if(req.body.isMedecin){
 //     //     const MeId=uuidv4().split("-")[0]
@@ -80,18 +81,31 @@ exports.deletePatient = async (req, res) => {
 //     res.json({ data: user });
 //   };
 
-  exports.updateUser = async (req, res) => {
+  const updateUser = async (req, res) => {
     try {
-      const user = await User.findById(req.params.id);
+      let token =jwt.sign({theId:req.body.theId},"mallaprojet")
+      let user = await User.findById(req.params.id);
+      delete user.password;
+      delete req.body.password;
       Object.assign(user, req.body);
+
       user.save();
-      res.json({ data: user });
+
+
+
+  delete user.password;
+  res.status(200).json({token,user})
+    
+
+
+
     } catch {
-      res.status(404).send({ error: "User not found!" });
+      res.status(500).json({error:err.message})
+
     }
   };
 
-  exports.deleteUser = async (req, res) => {
+  const deleteUser = async (req, res) => {
     try {
       const user = await User.findById(req.params.id);
       await user.remove();
@@ -102,7 +116,7 @@ exports.deletePatient = async (req, res) => {
   };
 
 
-  exports.getUser= async (req, res) => {
+  const getUser= async (req, res) => {
     try {
       const user = await User.findById(req.params.id);
       res.json({ data: user });
@@ -113,10 +127,10 @@ exports.deletePatient = async (req, res) => {
 
 
 
-  exports.querrySearchUser = async (req, res) => {
+  const querrySearchUser = async (req, res) => {
     const {search, limit}=req.query
     console.log({search,limit})
-    let user
+    let patient
     if (search){
       const spaceNum=(search.match(/ /g) || []).length
       console.log(spaceNum)
@@ -124,7 +138,9 @@ exports.deletePatient = async (req, res) => {
         
         let prenom =search.split(' ')[0];
         let nom =search.split(' ')[1];
-      user =Object.assign( await User.find({prenom:prenom,nom:nom}), await User.find({prenom:nom,nom:prenom}));
+        patient =Object.assign( await Patient.find({prenom:prenom,nom:nom}), await Patient.find({prenom:nom,nom:prenom}),
+        await Patient.find({prenom:search}),await Patient.find({nom:search})
+        );
       } else if(spaceNum==2){
         let prenom =search.split(' ')[0];
         let middle =search.split(' ')[1];
@@ -133,12 +149,15 @@ exports.deletePatient = async (req, res) => {
         let composedSecond=middle+nom
         let composedFirstSpace=prenom+" "+middle
         let composedSecondSpace=middle+" "+nom
-        user =Object.assign( 
-          await User.find({prenom:composedFirst,nom:nom}), await User.find({prenom:nom,nom:composedFirst}),
-          await User.find({prenom:composedSecond,nom:prenom}), await User.find({prenom:prenom,nom:composedSecond}),
-          await User.find({prenom:composedFirstSpace,nom:nom}), await User.find({prenom:nom,nom:composedFirstSpace}),
-          await User.find({prenom:composedSecondSpace,nom:prenom}), await User.find({prenom:prenom,nom:composedSecondSpace})
+        patient =Object.assign( 
+          await Patient.find({prenom:composedFirst,nom:nom}), await Patient.find({prenom:nom,nom:composedFirst}),
+          await Patient.find({prenom:composedSecond,nom:prenom}), await Patient.find({prenom:prenom,nom:composedSecond}),
+          await Patient.find({prenom:composedFirstSpace,nom:nom}), await Patient.find({prenom:nom,nom:composedFirstSpace}),
+          await Patient.find({prenom:composedSecondSpace,nom:prenom}), await Patient.find({prenom:prenom,nom:composedSecondSpace}),
+          await Patient.find({prenom:search}),await Patient.find({nom:search})
         );
+        console.log(patient,1)
+
       }else if(spaceNum==3){
         let prenom =search.split(' ')[0];
         let middle =search.split(' ')[1];
@@ -149,26 +168,31 @@ exports.deletePatient = async (req, res) => {
         let composedFirstSpace=prenom+" "+middle
         let composedSecondSpace=secondmiddle+" "+nom
         console.log(composedFirstSpace,composedSecondSpace)
-        user =Object.assign( 
-         await User.find({prenom:composedFirst,nom:composedSecond}), await User.find({prenom:composedSecond,nom:composedFirst}),
-         await User.find({prenom:composedFirstSpace,nom:composedSecondSpace}), await User.find({prenom:composedSecondSpace,nom:composedFirstSpace}),
-         await User.find({prenom:composedFirstSpace,nom:composedSecond}), await User.find({prenom:composedSecond,nom:composedFirstSpace}),
-         await User.find({prenom:composedFirst,nom:composedSecondSpace}), await User.find({prenom:composedSecondSpace,nom:composedFirst})
+        patient =Object.assign( 
+         await Patient.find({prenom:composedFirst,nom:composedSecond}), await Patient.find({prenom:composedSecond,nom:composedFirst}),
+         await Patient.find({prenom:composedFirstSpace,nom:composedSecondSpace}), await Patient.find({prenom:composedSecondSpace,nom:composedFirstSpace}),
+         await Patient.find({prenom:composedFirstSpace,nom:composedSecond}), await Patient.find({prenom:composedSecond,nom:composedFirstSpace}),
+         await Patient.find({prenom:composedFirst,nom:composedSecondSpace}), await Patient.find({prenom:composedSecondSpace,nom:composedFirst}),
+         await Patient.find({prenom:search}),await Patient.find({nom:search})
          );
+         console.log(patient,2)
 
       }else if(spaceNum>3){
         return res.status(400).json({success:false})
                     
       }else{
-      user =Object.assign(await User.find({prenom:search}),await User.find({nom:search}));
+        patient =Object.assign(await Patient.find({prenom:search}),await Patient.find({nom:search}));
+      console.log(patient,3)
+
       };
     }else{
-    user = await User.find();
+      patient = await Patient.find();
     }
+    console.log(patient,4)
     if (limit){
-      user=user.slice(0,Number(limit))
+      patient=patient.slice(0,Number(limit))
     };
-    res.status(200).json({data:user})
+    res.status(200).json({data:patient})
   };
 
 
@@ -182,7 +206,7 @@ exports.deletePatient = async (req, res) => {
 
 
 
-  exports.findRapport = async (req, res) => {
+  const findRapport = async (req, res) => {
     try {
       const rapport = await Rapport.findById(req.params.id);
       res.json({ data: rapport });
@@ -192,13 +216,13 @@ exports.deletePatient = async (req, res) => {
   };
 
 
-  exports.createRapport = async (req, res) => {
+  const createRapport = async (req, res) => {
     const rapport = new Rapport(req.body);
     await rapport.save();
     res.json({ data: rapport });
   };
 
-  exports.updateRapport = async (req, res) => {
+  const updateRapport = async (req, res) => {
     try {
       const rapport = await Rapport.findById(req.params.id);
       Object.assign(rapport, req.body);
@@ -209,7 +233,7 @@ exports.deletePatient = async (req, res) => {
     }
   };
 
-  exports.deleteRapport = async (req, res) => {
+  const deleteRapport = async (req, res) => {
     try {
       const rapport = await Rapport.findById(req.params.id);
       await rapport.remove();
@@ -220,7 +244,26 @@ exports.deletePatient = async (req, res) => {
   };
 
 
-  exports.findRapports = async (req, res) => {
-    const rapports = await Rapport.find();
+  const findRapports = async (req, res) => {
+    console.log(req.params)
+    const rapports = await Rapport.find({idPatient:req.params.id});
     res.json({ data: rapports });
+  };
+
+
+  export default {
+    findPatients,
+    createPatient,
+    findPatient,
+    updatePatient,
+    deletePatient,
+    updateUser,
+    deleteUser,
+    getUser,
+    querrySearchUser,
+    findRapport,
+    createRapport,
+    updateRapport,
+    deleteRapport,
+    findRapports,
   };

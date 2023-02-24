@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    Medecin:{
-        type: mongoose.Schema.ObjectId, 
-        ref: 'Medecin',
+    MedecinId:{
+        type: String, 
+
         required:true
     },
     idPatient:{
@@ -11,12 +11,24 @@ const schema = new mongoose.Schema({
         required:true
     },
     contenu:{
-        type:{nom:String,prenom:String,diagnostic:String},
+        type:String,
         required:true
     },
     typeImagerie:{
         type:String,
+    },
+    nomPrenom:{
+        type:String,
+        required:true
+    },
+    publicationDate:{
+        type:String,
         required:true
     }
+    
 },{timestamps:true}); 
-module.exports = mongoose.model("Rapport", schema);
+
+const Rapport = mongoose.model("Rapport", schema);
+
+
+export default Rapport;

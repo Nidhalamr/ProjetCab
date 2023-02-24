@@ -1,29 +1,28 @@
-const User =require("../models/User")
-const jwt = require('jsonwebtoken');
-const bcrypt = require ('bcrypt');
-const { createPatient } = require("../contoller/patientc");
-const { v4: uuidv4 } = require('uuid');
+import User from "../models/User.js";
+import jwt  from 'jsonwebtoken';
+import bcrypt  from 'bcrypt';
+import {uuid} from 'uuidv4';
 
 const register = async (req, res) => {
   try {
-    let random=uuidv4()
+    let random=uuid()
     let login= {theId:random}
-
+console.log(random,"ran")
     const{
-  theId,
   nom,
   prenom,
   password,
   dateDeNaissance,
   genre,
-  isMedecin
+  isMedecin,
+  picturePath
     }=req.body
- 
-    if (isMedecin===true){
+    console.log(isMedecin)
+    if (isMedecin){
     login={theId:random.split("-")[0]}
 
     }else{
-      login={theId:random.split("-")[0].slice(2)}
+    login={theId:random.split("-")[0].slice(2)}
     }
     const salt = await bcrypt.genSalt();
     const passwordHash= await bcrypt.hash(password,salt)
@@ -35,6 +34,7 @@ const register = async (req, res) => {
   dateDeNaissance,
   genre,
   isMedecin,
+  picturePath,
 
     
     
@@ -95,4 +95,4 @@ try {
 
 
 
-module.exports={register,login}
+export default {register,login}

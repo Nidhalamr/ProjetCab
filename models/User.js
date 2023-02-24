@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 
 // const isM =(schema)=>{
@@ -39,10 +39,18 @@ const schema = new mongoose.Schema({
     isMedecin:{
         type:Boolean,
         default:false
+    },
+    picturePath:{
+        type:String,
+        
     }
 
    
 },{timestamps:true}); 
-module.exports = mongoose.model("User", schema);
+
+const User = mongoose.model("User", schema);
+
+
+export default User;
 
 

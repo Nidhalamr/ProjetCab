@@ -1,5 +1,5 @@
-const mongoose=require("mongoose")
-const config=require("config")
+import mongoose from "mongoose"
+import config from "config"
 
 const connectDB=()=>{
     
@@ -8,4 +8,4 @@ const connectDB=()=>{
     .catch((err)=>console.log(err));
 };
 
-module.exports=connectDB;
+export default connectDB;
